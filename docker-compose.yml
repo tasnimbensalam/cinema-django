@@ -1,16 +1,11 @@
+
 services:
   postgres:
     image: postgres:16
-    networks:
-      default:
-        aliases:
-          - postgresLocalServer_Project
     container_name: postgres_db
     restart: always
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: mydb
+    env_file:
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -20,25 +15,24 @@ services:
     image: dpage/pgadmin4
     container_name: pgadmin_web
     restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+    env_file:
+      - .env
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - postgres
-  
-  backend_dev : 
-    build : . # contruit le contenaire  a partir de mon docker file ./DockerFile
-    container_name: Project_Django_Dev
-    image : dev_env
-    volumes: # acces au code dans le container depuis mon dossier project
-      - ./backend:/app_dev
-    ports : 
-      - "8000:8000"
-    depends_on : 
-      - postgres
-    # pour mon terminal de dev pour interagir avec le bash lancer dans le docker file 
-    stdin_open : true
-    tty : true 
 
+  backend:
+    build: .
+    container_name: backend
+    image: dev_env
+    volumes:
+      - .:/app_dev
+    ports:
+      - "7777:7777"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    stdin_open: true
+    tty: true
